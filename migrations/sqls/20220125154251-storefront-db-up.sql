@@ -1,4 +1,3 @@
-/* Replace with your SQL commands */
 CREATE TABLE products (
     id SERIAL PRIMARY KEY,
     name VARCHAR(150),
@@ -21,7 +20,7 @@ CREATE TABLE users (
 CREATE TABLE orders (
     id SERIAL PRIMARY KEY,
     user_id BIGINT REFERENCES users(id),
-    price INTEGER
+    status VARCHAR(8)
 );
 
 CREATE TABLE order_products (
