@@ -1,7 +1,7 @@
 import Client from '../database';
 
 export type Order = {
-  id: number;
+  id?: number;
   user_id: string;
   status: string;
 };
@@ -22,14 +22,27 @@ export class OrderStore {
     }
   }
 
-  async indexByUser(userId: string, complete: boolean): Promise<Order[]> {
+  async indexByUser(userId: string): Promise<Order[]> {
     try {
       const conn = await Client.connect();
-      let sql = `SELECT * FROM orders WHERE user_id = ${userId}`;
-      if (complete) {
-        sql += ' AND status = "complete"';
-      }
-      const result = await conn.query(sql);
+      let sql = 'SELECT * FROM orders WHERE user_id = ($1)';
+
+      const result = await conn.query(sql, [userId]);
+
+      conn.release();
+
+      return result.rows;
+    } catch (err) {
+      throw new Error(`Could not get orders. Error: ${err}`);
+    }
+  }
+
+
+  async indexCompleteByUser(userId: string): Promise<Order[]> {
+    try {
+      const conn = await Client.connect();
+      let sql = 'SELECT * FROM orders WHERE user_id = ($1) AND status = ($2)';
+      const result = await conn.query(sql, [userId, "complete"]);
 
       conn.release();
 
@@ -57,10 +70,10 @@ export class OrderStore {
   async create(o: Order): Promise<Order> {
     try {
       const sql =
-        'INSERT INTO orders (name, price, category) VALUES($1, $2, $3) RETURNING *';
+        'INSERT INTO orders (user_id, status, id) VALUES($1, $2, $3) RETURNING *';
       const conn = await Client.connect();
 
-      const result = await conn.query(sql, [o.user_id, o.status]);
+      const result = await conn.query(sql, [o.user_id, o.status, o.id]);
 
       const order = result.rows[0];
 

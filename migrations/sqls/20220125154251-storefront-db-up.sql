@@ -17,6 +17,8 @@ CREATE TABLE users (
     password_digest VARCHAR
 );
 
+INSERT INTO users (firstName, lastName, password_digest) VALUES('John', 'Doe', 'alksal');
+
 CREATE TABLE orders (
     id SERIAL PRIMARY KEY,
     user_id BIGINT REFERENCES users(id),

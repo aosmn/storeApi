@@ -1,7 +1,7 @@
 import Client from '../database';
 
 export type Product = {
-  id: number;
+  id?: number;
   name: string;
   category: string;
   price: number;
@@ -13,10 +13,24 @@ export class ProductStore {
       const conn = await Client.connect();
       let sql = 'SELECT * FROM products';
       if (category) {
-        sql += ` WHERE category = ${category}`;
+        sql += ` WHERE category=${category}`;
       }
 
       const result = await conn.query(sql);
+
+      conn.release();
+
+      return result.rows;
+    } catch (err) {
+      throw new Error(`Could not get products. Error: ${err}`);
+    }
+  }
+  async indexByCategory(category: string): Promise<Product[]> {
+    try {
+      const conn = await Client.connect();
+      let sql = 'SELECT * FROM products WHERE category=($1)';
+
+      const result = await conn.query(sql, [category]);
 
       conn.release();
 
@@ -63,18 +77,18 @@ export class ProductStore {
     }
   }
 
-  async delete(id: string): Promise<Product> {
+  async delete(id: string): Promise<number> {
     try {
       const sql = 'DELETE FROM products WHERE id=($1)';
       const conn = await Client.connect();
 
       const result = await conn.query(sql, [id]);
 
-      const product = result.rows[0];
+      const rowCount = result.rowCount;
 
       conn.release();
 
-      return product;
+      return rowCount;
     } catch (err) {
       throw new Error(`Could not delete product ${id}. Error: ${err}`);
     }
