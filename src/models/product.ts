@@ -8,13 +8,10 @@ export type Product = {
 };
 
 export class ProductStore {
-  async index(category?: string): Promise<Product[]> {
+  async index(): Promise<Product[]> {
     try {
       const conn = await Client.connect();
       let sql = 'SELECT * FROM products';
-      if (category) {
-        sql += ` WHERE category=${category}`;
-      }
 
       const result = await conn.query(sql);
 
