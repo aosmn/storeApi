@@ -1,4 +1,6 @@
 import express, { Request, Response } from 'express';
+import { generateToken } from '../helpers/auth';
+import { verifyAuthToken } from '../middleware/auth';
 import { User, UserStore } from '../models/user';
 // TODO: add auth
 // TODO: add password encryption
@@ -10,22 +12,44 @@ const index = async (_req: Request, res: Response) => {
 };
 
 const show = async (req: Request, res: Response) => {
-  const user = await store.show(req.body.id);
+  const user = await store.show(req.params.id);
+  delete user.password_digest;
   res.json(user);
 };
 
 const create = async (req: Request, res: Response) => {
   try {
     const user: User = {
+      username: req.body.username,
       firstname: req.body.firstname,
       lastname: req.body.lastname,
-      password_digest: req.body.password_digest
+      password: req.body.password
     };
-
+    
     const newUser = await store.create(user);
-    res.json(newUser);
+    const token = generateToken(newUser);
+    res.json(token);
   } catch (err) {
     res.status(400);
+    res.json(err);
+  }
+};
+
+const authenticate = async (req: Request, res: Response) => {
+  try {
+    const { username, password } = req.body;
+
+    const user = await store.authenticate(username, password);
+    if (user) {
+      const token = generateToken(user);
+      res.json(token);
+    } else {
+      res.status(401);
+      // TODO: more specific error
+      res.json("Authentication Error");
+    }
+  } catch (err) {
+    res.status(401);
     res.json(err);
   }
 };
@@ -36,10 +60,11 @@ const destroy = async (req: Request, res: Response) => {
 };
 
 const userRoutes = (app: express.Application) => {
-  app.get('/users', index);
+  app.get('/users', verifyAuthToken, index);
   app.post('/users', create);
-  app.get('/users/:id', show);
-  app.delete('/users/:id', destroy);
+  app.get('/users/:id', verifyAuthToken, show);
+  app.post('/users/login', authenticate)
+  app.delete('/users/:id', verifyAuthToken, destroy);
 };
 
 export default userRoutes;

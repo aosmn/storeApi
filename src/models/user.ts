@@ -1,10 +1,15 @@
 import Client from '../database';
+import bcrypt from 'bcrypt';
+const pepper = process.env.BCRYPT_PASSWORD;
+const saltRounds = process.env.SALT_ROUNDS;
 
 export type User = {
   id?: number;
+  username: string;
   firstname: string;
   lastname: string;
-  password_digest: string;
+  password: string;
+  password_digest?: string
 };
 
 export class UserStore {
@@ -40,23 +45,51 @@ export class UserStore {
 
   async create(u: User): Promise<User> {
     try {
+      const hash = bcrypt.hashSync(u.password + pepper, parseInt(saltRounds as string));
       const sql =
-        'INSERT INTO users (firstname, lastname, password_digest) VALUES($1, $2, $3) RETURNING *';
+        'INSERT INTO users (username, firstname, lastname, password_digest) VALUES($1, $2, $3, $4) RETURNING *';
       const conn = await Client.connect();
-
+      
       const result = await conn.query(sql, [
+        u.username,
         u.firstname,
         u.lastname,
-        u.password_digest
+        hash
       ]);
-
+      
       const user = result.rows[0];
 
       conn.release();
-
+      
       return user;
     } catch (err) {
+      console.log('hena', err);
       throw new Error(`Could not add new user ${u.firstname}. Error: ${err}`);
+    }
+  }
+
+  async authenticate(username: string, password: string): Promise<User | null> {
+
+    try {
+      const sql = 'SELECT password_digest FROM users WHERE username=($1)';
+      const conn = await Client.connect();
+
+      const result = await conn.query(sql, [username]);
+      if(result.rows.length){
+        const user = result.rows[0];
+        const areEqual = bcrypt.compareSync(password+pepper, user.password_digest);
+
+        conn.release();
+        if(areEqual) {
+          return user;
+        } else {
+          throw new Error(`Could not find user ${username}. Error: Wrong Password`);
+        }
+      }
+
+      return null;
+    } catch (err) {
+      throw new Error(`Could not find user ${username}. Error: ${err}`);
     }
   }
 
