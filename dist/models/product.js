@@ -92,6 +92,17 @@ var ProductStore = /** @class */ (function () {
             });
         });
     };
+    // async showTopFive(): Promise<Product[]> {
+    //   try {
+    //     const conn = await Client.connect();
+    //     let sql = 'SELECT * FROM products WHERE category=($1)';
+    //     const result = await conn.query(sql, [category]);
+    //     conn.release();
+    //     return result.rows;
+    //   } catch (err) {
+    //     throw new Error(`Could not get products. Error: ${err}`);
+    //   }
+    // }
     ProductStore.prototype.show = function (id) {
         return __awaiter(this, void 0, void 0, function () {
             var sql, conn, result, err_3;

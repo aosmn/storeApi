@@ -36,6 +36,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+var auth_1 = require("../helpers/auth");
+var auth_2 = require("../middleware/auth");
 var user_1 = require("../models/user");
 // TODO: add auth
 // TODO: add password encryption
@@ -56,34 +58,66 @@ var show = function (req, res) { return __awaiter(void 0, void 0, void 0, functi
     var user;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, store.show(req.body.id)];
+            case 0: return [4 /*yield*/, store.show(req.params.id)];
             case 1:
                 user = _a.sent();
+                delete user.password_digest;
                 res.json(user);
                 return [2 /*return*/];
         }
     });
 }); };
 var create = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var user, newUser, err_1;
+    var user, newUser, token, err_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
                 user = {
+                    username: req.body.username,
                     firstname: req.body.firstname,
                     lastname: req.body.lastname,
-                    password_digest: req.body.password_digest
+                    password: req.body.password
                 };
                 return [4 /*yield*/, store.create(user)];
             case 1:
                 newUser = _a.sent();
-                res.json(newUser);
+                token = (0, auth_1.generateToken)(newUser);
+                res.json(token);
                 return [3 /*break*/, 3];
             case 2:
                 err_1 = _a.sent();
                 res.status(400);
                 res.json(err_1);
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); };
+var authenticate = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, username, password, user, token, err_2;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                _b.trys.push([0, 2, , 3]);
+                _a = req.body, username = _a.username, password = _a.password;
+                return [4 /*yield*/, store.authenticate(username, password)];
+            case 1:
+                user = _b.sent();
+                if (user) {
+                    token = (0, auth_1.generateToken)(user);
+                    res.json(token);
+                }
+                else {
+                    res.status(401);
+                    // TODO: more specific error
+                    res.json("Authentication Error");
+                }
+                return [3 /*break*/, 3];
+            case 2:
+                err_2 = _b.sent();
+                res.status(401);
+                res.json(err_2);
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
         }
@@ -102,9 +136,10 @@ var destroy = function (req, res) { return __awaiter(void 0, void 0, void 0, fun
     });
 }); };
 var userRoutes = function (app) {
-    app.get('/users', index);
+    app.get('/users', auth_2.verifyAuthToken, index);
     app.post('/users', create);
-    app.get('/users/:id', show);
-    app["delete"]('/users/:id', destroy);
+    app.get('/users/:id', auth_2.verifyAuthToken, show);
+    app.post('/users/login', authenticate);
+    app["delete"]('/users/:id', auth_2.verifyAuthToken, destroy);
 };
 exports["default"] = userRoutes;

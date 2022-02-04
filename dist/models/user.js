@@ -41,6 +41,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 exports.__esModule = true;
 exports.UserStore = void 0;
 var database_1 = __importDefault(require("../database"));
+var bcrypt_1 = __importDefault(require("bcrypt"));
+var pepper = process.env.BCRYPT_PASSWORD;
+var saltRounds = process.env.SALT_ROUNDS;
 var UserStore = /** @class */ (function () {
     function UserStore() {
     }
@@ -54,7 +57,7 @@ var UserStore = /** @class */ (function () {
                         return [4 /*yield*/, database_1["default"].connect()];
                     case 1:
                         conn = _a.sent();
-                        sql = 'SELECT * FROM users';
+                        sql = 'SELECT username, firstname, lastname FROM users';
                         return [4 /*yield*/, conn.query(sql)];
                     case 2:
                         result = _a.sent();
@@ -75,7 +78,7 @@ var UserStore = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 3, , 4]);
-                        sql = 'SELECT * FROM users WHERE id=($1)';
+                        sql = 'SELECT username, firstname, lastname FROM users WHERE id=($1)';
                         return [4 /*yield*/, database_1["default"].connect()];
                     case 1:
                         conn = _a.sent();
@@ -94,28 +97,67 @@ var UserStore = /** @class */ (function () {
     };
     UserStore.prototype.create = function (u) {
         return __awaiter(this, void 0, void 0, function () {
-            var sql, conn, result, user, err_3;
+            var hash, sql, conn, result, user, err_3;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 3, , 4]);
-                        sql = 'INSERT INTO users (firstname, lastname, password_digest) VALUES($1, $2, $3) RETURNING *';
+                        _a.trys.push([0, 5, , 6]);
+                        if (!u.password) return [3 /*break*/, 3];
+                        hash = bcrypt_1["default"].hashSync(u.password + pepper, parseInt(saltRounds));
+                        sql = 'INSERT INTO users (username, firstname, lastname, password_digest) VALUES($1, $2, $3, $4) RETURNING username, firstname, lastname';
                         return [4 /*yield*/, database_1["default"].connect()];
                     case 1:
                         conn = _a.sent();
                         return [4 /*yield*/, conn.query(sql, [
+                                u.username,
                                 u.firstname,
                                 u.lastname,
-                                u.password_digest
+                                hash
                             ])];
                     case 2:
                         result = _a.sent();
                         user = result.rows[0];
                         conn.release();
                         return [2 /*return*/, user];
-                    case 3:
+                    case 3: throw new Error("password is required");
+                    case 4: return [3 /*break*/, 6];
+                    case 5:
                         err_3 = _a.sent();
                         throw new Error("Could not add new user ".concat(u.firstname, ". Error: ").concat(err_3));
+                    case 6: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    UserStore.prototype.authenticate = function (username, password) {
+        return __awaiter(this, void 0, void 0, function () {
+            var sql, conn, result, user, areEqual, err_4;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 3, , 4]);
+                        sql = 'SELECT password_digest FROM users WHERE username=($1)';
+                        return [4 /*yield*/, database_1["default"].connect()];
+                    case 1:
+                        conn = _a.sent();
+                        return [4 /*yield*/, conn.query(sql, [username])];
+                    case 2:
+                        result = _a.sent();
+                        if (result.rows.length) {
+                            user = result.rows[0];
+                            areEqual = bcrypt_1["default"].compareSync(password + pepper, user.password_digest);
+                            conn.release();
+                            if (areEqual) {
+                                return [2 /*return*/, user];
+                            }
+                            else {
+                                throw new Error("Could not find user ".concat(username, ". Error: Wrong Password"));
+                            }
+                        }
+                        return [2 /*return*/, null];
+                    case 3:
+                        err_4 = _a.sent();
+                        throw new Error("Could not find user ".concat(username, ". Error: ").concat(err_4));
                     case 4: return [2 /*return*/];
                 }
             });
@@ -123,7 +165,7 @@ var UserStore = /** @class */ (function () {
     };
     UserStore.prototype["delete"] = function (id) {
         return __awaiter(this, void 0, void 0, function () {
-            var sql, conn, result, user, err_4;
+            var sql, conn, result, user, err_5;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -139,8 +181,8 @@ var UserStore = /** @class */ (function () {
                         conn.release();
                         return [2 /*return*/, user];
                     case 3:
-                        err_4 = _a.sent();
-                        throw new Error("Could not delete user ".concat(id, ". Error: ").concat(err_4));
+                        err_5 = _a.sent();
+                        throw new Error("Could not delete user ".concat(id, ". Error: ").concat(err_5));
                     case 4: return [2 /*return*/];
                 }
             });

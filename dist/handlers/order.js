@@ -36,8 +36,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+var auth_1 = require("../middleware/auth");
 var order_1 = require("../models/order");
-// TODO: add auth
 var store = new order_1.OrderStore();
 var index = function (_req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var orders;
@@ -79,7 +79,7 @@ var show = function (req, res) { return __awaiter(void 0, void 0, void 0, functi
     var order;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, store.show(req.body.id)];
+            case 0: return [4 /*yield*/, store.show(req.params.id)];
             case 1:
                 order = _a.sent();
                 res.json(order);
@@ -87,7 +87,6 @@ var show = function (req, res) { return __awaiter(void 0, void 0, void 0, functi
         }
     });
 }); };
-// TODO: Add order products 
 var create = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var order, newOrder, err_1;
     return __generator(this, function (_a) {
@@ -124,12 +123,86 @@ var destroy = function (req, res) { return __awaiter(void 0, void 0, void 0, fun
         }
     });
 }); };
+var addProduct = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var orderId, productId, quantity, addedProduct, err_2;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                orderId = req.params.id;
+                productId = req.body.productId;
+                quantity = parseInt(req.body.quantity);
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, store.addProduct(quantity, orderId, productId)];
+            case 2:
+                addedProduct = _a.sent();
+                res.json(addedProduct);
+                return [3 /*break*/, 4];
+            case 3:
+                err_2 = _a.sent();
+                res.status(400);
+                res.json(err_2);
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
+        }
+    });
+}); };
+var getProducts = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var orderId, orderProducts, err_3;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                orderId = req.params.id;
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, store.showOrderProducts(orderId)];
+            case 2:
+                orderProducts = _a.sent();
+                res.json(orderProducts);
+                return [3 /*break*/, 4];
+            case 3:
+                err_3 = _a.sent();
+                res.status(400);
+                res.json(err_3);
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
+        }
+    });
+}); };
+var deleteProduct = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, orderId, productId, deleted, err_4;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                _a = req.params, orderId = _a.orderId, productId = _a.productId;
+                _b.label = 1;
+            case 1:
+                _b.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, store.deleteOrderProduct(orderId, productId)];
+            case 2:
+                deleted = _b.sent();
+                res.json(deleted);
+                return [3 /*break*/, 4];
+            case 3:
+                err_4 = _b.sent();
+                res.status(400);
+                res.json(err_4);
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
+        }
+    });
+}); };
 var orderRoutes = function (app) {
     app.get('/orders', index);
+    app.get('/orders/:id/products', auth_1.verifyAuthToken, getProducts);
+    app.post('/orders/:id/products', auth_1.verifyAuthToken, addProduct);
+    app.post('/orders/:orderId/products/productId', auth_1.verifyAuthToken, deleteProduct);
     app.get('/orders/:id', show);
-    app.get('/orders/user/:id/complete', indexCompleteByUser);
-    app.get('/orders/user/:id', indexByUser);
-    app.post('/orders', create);
-    app["delete"]('/orders/:id', destroy);
+    app["delete"]('/orders/:id', auth_1.verifyAuthToken, destroy);
+    app.get('/orders/user/:id/complete', auth_1.verifyAuthToken, indexCompleteByUser);
+    app.get('/orders/user/:id', auth_1.verifyAuthToken, indexByUser);
+    app.post('/orders', auth_1.verifyAuthToken, create);
 };
 exports["default"] = orderRoutes;

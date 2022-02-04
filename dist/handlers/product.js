@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+var auth_1 = require("../middleware/auth");
 var product_1 = require("../models/product");
 // TODO: add auth
 var store = new product_1.ProductStore();
@@ -67,7 +68,7 @@ var show = function (req, res) { return __awaiter(void 0, void 0, void 0, functi
     var product;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, store.show(req.body.id)];
+            case 0: return [4 /*yield*/, store.show(req.params.id)];
             case 1:
                 product = _a.sent();
                 res.json(product);
@@ -116,7 +117,7 @@ var productRoutes = function (app) {
     app.get('/products', index);
     app.get('/products/category/:id', indexByCategory);
     app.get('/products/:id', show);
-    app.post('/products', create);
-    app["delete"]('/products/:id', destroy);
+    app.post('/products', auth_1.verifyAuthToken, create);
+    app["delete"]('/products/:id', auth_1.verifyAuthToken, destroy);
 };
 exports["default"] = productRoutes;

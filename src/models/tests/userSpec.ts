@@ -3,10 +3,9 @@ import { UserStore } from '../../models/user';
 const store = new UserStore();
 const startingIndex = [
   {
-    id: 1,
+    username:"johndoe", 
     firstname: 'John',
     lastname: 'Doe',
-    password_digest: 'alksal'
   }
 ];
 
@@ -38,25 +37,25 @@ describe('User Model', () => {
 
   it('create method should add a user', async () => {
     const result = await store.create({
+      username: 'janedoe',
       firstname: 'Jane',
       lastname: 'Doe',
-      password_digest: 'alksal'
+      password: 'password'
     });
     delete result.id;
     expect(result).toEqual({
+      username: 'janedoe',
       firstname: 'Jane',
       lastname: 'Doe',
-      password_digest: 'alksal'
     });
   });
 
   it('show method should return the correct user', async () => {
     const result = await store.show('2');
     expect(result).toEqual({
-      id: 2,
+      username: 'janedoe',
       firstname: 'Jane',
       lastname: 'Doe',
-      password_digest: 'alksal'
     });
   });
 
