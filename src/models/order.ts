@@ -120,9 +120,7 @@ export class OrderStore {
         throw new Error(
           `Could not add product ${productId} to order ${orderId} because order status is ${order.status}`
         );
-      }
-      console.log('hena');
-      
+      }      
 
       conn.release();
     } catch (err) {
@@ -137,7 +135,6 @@ export class OrderStore {
       const result = await conn.query(sql, [quantity, orderId, productId]);
 
       const order = result.rows[0];
-      console.log(order);
 
       conn.release();
 

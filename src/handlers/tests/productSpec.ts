@@ -39,7 +39,6 @@ describe('Products routes', () => {
   describe('GET /products/:id', () => {
     it('should return a JSON object', async () => {
       const response = await request.get('/products/1').expect(200);
-      console.log(response.body);
 
       expect(response.body).toBeInstanceOf(Object);
       expect(response.body).toEqual({

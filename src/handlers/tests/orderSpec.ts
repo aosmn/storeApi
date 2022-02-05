@@ -161,7 +161,6 @@ describe('Order routes', () => {
         .delete('/orders/1/products/1')
         .set('Authorization', `bearer ${user.token}`)
         .expect(200);
-      console.log(res.body);
 
       const order = await request
         .get('/orders/1/products')
