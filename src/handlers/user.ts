@@ -2,8 +2,7 @@ import express, { Request, Response } from 'express';
 import { generateToken } from '../helpers/auth';
 import { verifyAuthToken } from '../middleware/auth';
 import { User, UserStore } from '../models/user';
-// TODO: add auth
-// TODO: add password encryption
+
 const store = new UserStore();
 
 const index = async (_req: Request, res: Response) => {
