@@ -14,6 +14,7 @@ const index = async (_req: Request, res: Response) => {
 const show = async (req: Request, res: Response) => {
   const user = await store.show(req.params.id);
   delete user.password_digest;
+
   res.json(user);
 };
 
@@ -25,13 +26,13 @@ const create = async (req: Request, res: Response) => {
       lastname: req.body.lastname,
       password: req.body.password
     };
-    
+
     const newUser = await store.create(user);
     const token = generateToken(newUser);
-    res.json(token);
+    res.json({ user: newUser, token });
   } catch (err) {
     res.status(400);
-    res.json(err);
+    res.send(err);
   }
 };
 
@@ -45,12 +46,11 @@ const authenticate = async (req: Request, res: Response) => {
       res.json(token);
     } else {
       res.status(401);
-      // TODO: more specific error
-      res.json("Authentication Error");
+      res.send('Authentication Error');
     }
   } catch (err) {
     res.status(401);
-    res.json(err);
+    res.send(new Error('Authentication Error, Invalid credentials'));
   }
 };
 
@@ -63,7 +63,7 @@ const userRoutes = (app: express.Application) => {
   app.get('/users', verifyAuthToken, index);
   app.post('/users', create);
   app.get('/users/:id', verifyAuthToken, show);
-  app.post('/users/login', authenticate)
+  app.post('/users/login', authenticate);
   app.delete('/users/:id', verifyAuthToken, destroy);
 };
 

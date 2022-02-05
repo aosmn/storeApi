@@ -69,8 +69,10 @@ export class OrderStore {
       const result = await conn.query(sql, [id]);
 
       conn.release();
-
-      return result.rows[0];
+      if (result.rows.length > 0) {
+        return result.rows[0];
+      }
+      throw new Error('Not Found');
     } catch (err) {
       throw new Error(`Could not find order ${id}. Error: ${err}`);
     }
@@ -79,10 +81,10 @@ export class OrderStore {
   async create(o: Order): Promise<Order> {
     try {
       const sql =
-        'INSERT INTO orders (user_id, status, id) VALUES($1, $2, $3) RETURNING *';
+        'INSERT INTO orders (user_id, status) VALUES($1, $2) RETURNING *';
       const conn = await Client.connect();
 
-      const result = await conn.query(sql, [o.user_id, o.status, o.id]);
+      const result = await conn.query(sql, [o.user_id, o.status]);
 
       const order = result.rows[0];
 
@@ -119,6 +121,8 @@ export class OrderStore {
           `Could not add product ${productId} to order ${orderId} because order status is ${order.status}`
         );
       }
+      console.log('hena');
+      
 
       conn.release();
     } catch (err) {
@@ -133,6 +137,7 @@ export class OrderStore {
       const result = await conn.query(sql, [quantity, orderId, productId]);
 
       const order = result.rows[0];
+      console.log(order);
 
       conn.release();
 
@@ -164,9 +169,13 @@ export class OrderStore {
     }
   }
 
-  async deleteOrderProduct(orderId: string, productId: string): Promise<OrderProduct> {
+  async deleteOrderProduct(
+    orderId: string,
+    productId: string
+  ): Promise<OrderProduct> {
     try {
-      const sql = 'DELETE FROM order_products WHERE order_id=($1) AND product_id=($2)';
+      const sql =
+        'DELETE FROM order_products WHERE order_id=($1) AND product_id=($2)';
       const conn = await Client.connect();
 
       const result = await conn.query(sql, [orderId, productId]);
@@ -177,7 +186,9 @@ export class OrderStore {
 
       return orderProduct;
     } catch (err) {
-      throw new Error(`Could not delete product ${productId} from order ${productId}. Error: ${err}`);
+      throw new Error(
+        `Could not delete product ${productId} from order ${productId}. Error: ${err}`
+      );
     }
   }
 

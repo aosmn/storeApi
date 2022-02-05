@@ -48,7 +48,7 @@ const addProduct = async (req: Request, res: Response) => {
   const orderId = req.params.id;
   const productId = req.body.productId;
   const quantity = parseInt(req.body.quantity);
-
+  
   try {
     const addedProduct = await store.addProduct(quantity, orderId, productId);
     res.json(addedProduct);
@@ -82,11 +82,11 @@ const deleteProduct = async (req: Request, res: Response) => {
 };
 
 const orderRoutes = (app: express.Application) => {
-  app.get('/orders', index);
+  app.get('/orders', index); //
 
   app.get('/orders/:id/products', verifyAuthToken, getProducts);
   app.post('/orders/:id/products', verifyAuthToken, addProduct);
-  app.post('/orders/:orderId/products/productId', verifyAuthToken, deleteProduct);
+  app.delete('/orders/:orderId/products/:productId', verifyAuthToken, deleteProduct);
   
   app.get('/orders/:id', show);
   app.delete('/orders/:id', verifyAuthToken, destroy);

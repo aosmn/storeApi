@@ -6,10 +6,11 @@ const saltRounds = process.env.SALT_ROUNDS;
 export type User = {
   id?: number;
   username: string;
-  firstname: string;
-  lastname: string;
+  firstname?: string;
+  lastname?: string;
   password?: string;
   password_digest?: string;
+  token?: string;
 };
 
 export class UserStore {
@@ -30,14 +31,15 @@ export class UserStore {
 
   async show(id: string): Promise<User> {
     try {
-      const sql = 'SELECT username, firstname, lastname FROM users WHERE id=($1)';
+      const sql =
+        'SELECT username, firstname, lastname FROM users WHERE id=($1)';
       const conn = await Client.connect();
 
       const result = await conn.query(sql, [id]);
 
       conn.release();
-
-      return result.rows[0];
+      if (result.rows?.length > 0) return result.rows[0];
+      throw new Error('Not Found');
     } catch (err) {
       throw new Error(`Could not find user ${id}. Error: ${err}`);
     }
@@ -52,7 +54,7 @@ export class UserStore {
           parseInt(saltRounds as string)
         );
         const sql =
-          'INSERT INTO users (username, firstname, lastname, password_digest) VALUES($1, $2, $3, $4) RETURNING username, firstname, lastname';
+          'INSERT INTO users (username, firstname, lastname, password_digest) VALUES($1, $2, $3, $4) RETURNING id, username, firstname, lastname';
         const conn = await Client.connect();
 
         const result = await conn.query(sql, [
@@ -68,8 +70,7 @@ export class UserStore {
 
         return user;
       } else {
-        throw new Error("password is required");
-        
+        throw new Error('password is required');
       }
     } catch (err) {
       throw new Error(`Could not add new user ${u.firstname}. Error: ${err}`);
@@ -93,15 +94,13 @@ export class UserStore {
         if (areEqual) {
           return user;
         } else {
-          throw new Error(
-            `Could not find user ${username}. Error: Wrong Password`
-          );
+          throw new Error('Wrong Credentials');
         }
       }
 
-      return null;
+      throw new Error(`Could not find user ${username}, Invalid credentials`);
     } catch (err) {
-      throw new Error(`Could not find user ${username}. Error: ${err}`);
+      throw err;
     }
   }
 

@@ -4,8 +4,8 @@ import orderRoutes from './handlers/order';
 import userRoutes from './handlers/user';
 import productRoutes from './handlers/product';
 
-const app: express.Application = express();
-const address: string = '0.0.0.0:3000';
+export const app = express();
+const address = '0.0.0.0:3000';
 
 
 app.use(bodyParser.json());

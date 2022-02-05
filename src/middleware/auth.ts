@@ -10,13 +10,16 @@ export const verifyAuthToken = (
   try {
     const authorizationHeader = req.headers.authorization;
     const token = authorizationHeader?.split(' ')[1];
+
     if (token) {
       verifyToken(token);
       next();
     } else {
       res.status(401);
+      res.send(new Error('Invalid token'))
     }
   } catch (error) {
     res.status(401);
+    res.send(new Error('Invalid token'))
   }
 };

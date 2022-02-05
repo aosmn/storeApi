@@ -61,8 +61,10 @@ export class ProductStore {
       const result = await conn.query(sql, [id]);
 
       conn.release();
-
-      return result.rows[0];
+      if (result.rows.length > 0) {
+        return result.rows[0];
+      }
+      throw "Not found";
     } catch (err) {
       throw new Error(`Could not find product ${id}. Error: ${err}`);
     }

@@ -35,8 +35,6 @@ describe('Product Model', () => {
 
   it('index method should return a list of products', async () => {
     const result = await store.index();
-    // console.log(result);
-
     expect(result).toEqual(startingIndex);
   });
 
@@ -61,9 +59,9 @@ describe('Product Model', () => {
   });
 
   it('show method should return the correct product', async () => {
-    const result = await store.show('5');
+    const result = await store.show('6');
     expect(result).toEqual({
-      id: 5,
+      id: 6,
       price: 13,
       name: 'product test',
       category: 'test category'
@@ -71,7 +69,7 @@ describe('Product Model', () => {
   });
 
   it('delete method should remove the product', async () => {
-    await store.delete('5');
+    await store.delete('6');
     const result = await store.index();    
 
     expect(result).toEqual(startingIndex);
