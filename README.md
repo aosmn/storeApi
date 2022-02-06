@@ -2,6 +2,23 @@
 
 ## Getting Started
 
+### Database & Server Info
+---
+- **Server Port** 3000
+- **Database Port** 5432
+
+- **Database creation**
+```sh
+CREATE USER store_admin WITH PASSWORD 'password123';
+
+CREATE DATABASE store;
+
+CREATE DATABASE store_test;
+```
+
+---
+### Server Setup
+---
 To be able to run th server you need to:
 
 - Create .env file similare to the provided .env.example file
