@@ -20,6 +20,8 @@ const loginUser = async () => {
 };
 
 describe('Products routes', () => {
+  beforeAll(loginUser);
+
   describe('GET /products', () => {
     it('should return a list of products', async () => {
       const response = await request.get('/products').expect(200);
@@ -55,14 +57,10 @@ describe('Products routes', () => {
   });
 
   describe('POST /products', function () {
-    describe('Authentication', function () {
-      it('should require authorization', async () => {
-        const response = await request.post('/products');
-        expect(response.status).toBe(401);
-      });
+    it('should require authorization', async () => {
+      const response = await request.post('/products');
+      expect(response.status).toBe(401);
     });
-
-    beforeEach(loginUser);
 
     it('should respond with JSON object', async () => {
       const res = await request
@@ -78,21 +76,16 @@ describe('Products routes', () => {
   });
 
   describe('DELETE /products/:id', function () {
-    describe('Authentication', function () {
-      it('should require authorization', async () => {
-        const response = await request.delete('/products/5');
-        expect(response.status).toBe(401);
-      });
+    it('should require authorization', async () => {
+      const response = await request.delete('/products/4');
+      expect(response.status).toBe(401);
     });
-
-    beforeEach(loginUser);
 
     it('should respond with Success status', async () => {
       await request
-        .delete('/products/5')
+        .delete('/products/4')
         .set('Authorization', `bearer ${user.token}`)
         .expect(200);
     });
   });
-  
 });

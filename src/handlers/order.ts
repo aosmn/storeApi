@@ -39,6 +39,8 @@ const show = async (req: Request, res: Response) => {
     const order = await store.show(req.params.id);
     res.json(order);
   } catch (error) {
+    console.log(error);
+
     res.status(400);
     res.send(error);
   }
@@ -54,6 +56,8 @@ const create = async (req: Request, res: Response) => {
     const newOrder = await store.create(order);
     res.json(newOrder);
   } catch (err) {
+    console.log(err);
+    
     res.status(400);
     res.json(err);
   }

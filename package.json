@@ -5,6 +5,7 @@
   "main": "server.ts",
   "scripts": {
     "migrate": "db-migrate up",
+    "migrate-test": "ENV=test db-migrate up --env test",
     "prestart": "tsc",
     "start": "node dist/server.js",
     "watch": "tsc-watch --esModuleInterop src/server.ts --outDir ./dist --onSuccess 'node ./dist/server.js'",

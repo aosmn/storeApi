@@ -32,7 +32,7 @@ describe('User Model', () => {
 
   it('index method should return a list of users', async () => {
     const result = await store.index();
-    expect(result).toEqual(startingIndex);
+    expect(result).toBeInstanceOf(Array);
   });
 
   it('create method should add a user', async () => {
@@ -51,19 +51,21 @@ describe('User Model', () => {
   });
 
   it('show method should return the correct user', async () => {
-    const result = await store.show('3');
+    const result = await store.show('1');
     
     expect(result).toEqual({
-      username: 'janedoe',
-      firstname: 'Jane',
+      username: 'johndoe',
+      firstname: 'John',
       lastname: 'Doe',
     });
   });
 
   it('delete method should remove the user', async () => {
-    await store.delete('3');
-    const result = await store.index();
-
-    expect(result).toEqual(startingIndex);
+    const res = await store.delete('3');
+    try {
+      const result = await store.show('3');
+    } catch (error) {
+      expect(error).toEqual(new Error('Could not find user 3. Error: Error: Not Found'));
+    }
   });
 });

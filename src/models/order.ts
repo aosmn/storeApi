@@ -83,7 +83,6 @@ export class OrderStore {
       const sql =
         'INSERT INTO orders (user_id, status) VALUES($1, $2) RETURNING *';
       const conn = await Client.connect();
-
       const result = await conn.query(sql, [o.user_id, o.status]);
 
       const order = result.rows[0];

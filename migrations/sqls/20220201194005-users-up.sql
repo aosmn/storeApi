@@ -8,3 +8,5 @@ CREATE TABLE users (
 );
 
 INSERT INTO users (username, firstName, lastName, password_digest) VALUES('johndoe','John', 'Doe', '$2b$10$xsGOodlCAporHMXtkcwQrOX9uq0C5KuOf8ApTxucaknyroLf4zDXS');
+INSERT INTO users (username, firstName, lastName, password_digest) VALUES('janedoe','Jane', 'Doe', '$2b$10$xsGOodlCAporHMXtkcwQrOX9uq0C5KuOf8ApTxucaknyroLf4zDXS');
+INSERT INTO users (username, firstName, lastName, password_digest) VALUES('janadoe','Joana', 'Doe', '$2b$10$xsGOodlCAporHMXtkcwQrOX9uq0C5KuOf8ApTxucaknyroLf4zDXS');

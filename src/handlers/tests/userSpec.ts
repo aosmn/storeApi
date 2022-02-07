@@ -5,7 +5,16 @@ import { app } from '../../server';
 const request = supertest(app);
 let user: User = { username: 'johndoe', password: 'password' };
 
+const loginUser = async () => {
+  const response = await request
+    .post('/users/login')
+    .send({ username: 'johndoe', password: 'password' });
+  user.token = response.body;
+};
+
 describe('Users routes', () => {
+  beforeAll(loginUser);
+
   describe('POST /users/login', () => {
     it('should respond with a JWT if user data is correct', async () => {
       const response = await request
@@ -33,10 +42,6 @@ describe('Users routes', () => {
         expect(response.status).toBe(401);
       });
     });
-    beforeEach(async () => {
-      const response = await request.post('/users/login').send(user);
-      user.token = response.body;
-    });
 
     it('should respond with JSON array', async () => {
       const response = await request
@@ -56,11 +61,6 @@ describe('Users routes', () => {
       });
     });
 
-    beforeEach(async () => {
-      const response = await request.post('/users/login').send(user);
-      user.token = response.body;
-    });
-
     it('should respond with JWT token', async () => {
       const response = await request
         .post('/users')
@@ -74,17 +74,12 @@ describe('Users routes', () => {
         .expect(200);
 
       expect(response.body).toBeInstanceOf(Object);
+      delete response.body.user.id;
       expect(response.body.user).toEqual({
-        id: 2,
         username: 'janeDoey',
         firstname: 'Jane',
         lastname: 'Doey'
       });
-
-      // user = { ...response.body.user, token: response.body.token };
-      // const res = await request
-      //   .delete('/users/' + user.id)
-      //   .set('Authorization', `bearer ${user.token}`);
     });
   });
 
@@ -96,16 +91,9 @@ describe('Users routes', () => {
       });
     });
 
-    beforeEach(async () => {
-      const response = await request
-        .post('/users/login')
-        .send({ username: 'johndoe', password: 'password' });
-      user.token = response.body;
-    });
-
     it('should respond a success status', async () => {
       const response = await request
-        .get('/users/2')
+        .get('/users/1')
         .set('Authorization', `bearer ${user.token}`)
         .expect(200);
     });
@@ -114,16 +102,9 @@ describe('Users routes', () => {
   describe('DELETE /users/:id', function () {
     describe('Authentication', function () {
       it('should require authorization', async () => {
-        const response = await request.get('/users');
+        const response = await request.delete('/users/2');
         expect(response.status).toBe(401);
       });
-    });
-
-    beforeEach(async () => {
-      const response = await request
-        .post('/users/login')
-        .send({ username: 'johndoe', password: 'password' });
-      user.token = response.body;
     });
 
     it('should respond a success status', async () => {

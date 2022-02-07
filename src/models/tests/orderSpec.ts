@@ -43,30 +43,12 @@ describe('Order Model', () => {
     });
   });
 
-  // it('create method should throw an error if order id exists', async () => {
-  //   let error;
-  //   try {
-  //     const result = await store.create({
-  //       id: 1,
-  //       user_id: '1',
-  //       status: 'active'
-  //     });
-  //   } catch (err) {
-  //     error = err;
-  //   }
-  //   expect(error).toEqual(
-  //     new Error(
-  //       `Could not add new order. Error: error: duplicate key value violates unique constraint "orders_pkey"`
-  //     )
-  //   );
-  // });
-
   it("create method should throw an error if user id doesn't exist", async () => {
     let error;
     try {
       const result = await store.create({
         id: 1,
-        user_id: '3',
+        user_id: '13',
         status: 'active'
       });
     } catch (err) {
@@ -86,39 +68,29 @@ describe('Order Model', () => {
 
   it('indexByUser method should return a list of orders filtered by user', async () => {
     const result = await store.indexByUser('1');
-    expect(result).toEqual([
-      {
-        id: 2,
-        user_id: '1',
-        status: 'active'
-      }
-    ]);
-    const result2 = await store.indexByUser('2');
-    expect(result2).toEqual([]);
+    expect(result).toBeInstanceOf(Array)
+    expect(result.filter(order => order.user_id !== '1').length).toEqual(0);
   });
 
   it('indexByUser method should return a list of orders filtered by user and completed', async () => {
     const result = await store.indexCompleteByUser('1');
-    expect(result).toEqual([]);
+    expect(result).toBeInstanceOf(Array)
+    expect(result.filter(order => order.user_id !== '1').length).toEqual(0);
+    expect(result.filter(order => order.status !== 'complete').length).toEqual(0);
   });
 
   it('show method should return the correct order', async () => {
-    const result = await store.show('2');
-
-    expect(result).toEqual({
-      id: 2,
-      user_id: '1',
-      status: 'active'
-    });
+    const result = await store.show('1');
+    expect(result.id).toEqual(1);
   });
 
   it('add product method should add product to order', async () => {
-    const result = await store.addProduct(12, '2', '1');
+    const result = await store.addProduct(12, '1', '1');
     delete result.id;
 
     expect(result).toEqual({
       quantity: 12,
-      order_id: '2',
+      order_id: '1',
       product_id: '1'
     });
   });
@@ -135,13 +107,16 @@ describe('Order Model', () => {
     await store.deleteOrderProduct('2', '1');
 
     const result = await store.showOrderProducts('2');
-    expect(result).toEqual([]);
+    expect(result.filter((p:OrderProduct) => p.id === 1)).toEqual([]);
   });
 
   it('delete method should remove the order', async () => {
-    await store.delete('2');
-    const result = await store.index();
+    await store.delete('5');
+    try {
+      const result = await store.show('5');
+    } catch (error) {
+      expect(error).toEqual(new Error('Could not find order 5. Error: Error: Not Found'));
+    }
 
-    expect(result).toEqual([]);
   });
 });
