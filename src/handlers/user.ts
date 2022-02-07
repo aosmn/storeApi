@@ -6,15 +6,24 @@ import { User, UserStore } from '../models/user';
 const store = new UserStore();
 
 const index = async (_req: Request, res: Response) => {
-  const users = await store.index();
-  res.json(users);
+  try {
+    const users = await store.index();
+    res.json(users);
+  } catch (error) {
+    res.status(400);
+    res.send(error)
+  }
 };
 
 const show = async (req: Request, res: Response) => {
-  const user = await store.show(req.params.id);
-  delete user.password_digest;
-
-  res.json(user);
+  try {
+    const user = await store.show(req.params.id);
+    delete user.password_digest;
+    res.json(user);
+  } catch (error) {
+    res.status(400);
+    res.send(error)
+  }
 };
 
 const create = async (req: Request, res: Response) => {
@@ -54,8 +63,13 @@ const authenticate = async (req: Request, res: Response) => {
 };
 
 const destroy = async (req: Request, res: Response) => {
-  const deleted = await store.delete(req.params.id);
-  res.json(deleted);
+  try {
+    const deleted = await store.delete(req.params.id);
+    res.json(deleted);
+  } catch (error) {
+    res.status(400);
+    res.send(error)
+  }
 };
 
 const userRoutes = (app: express.Application) => {

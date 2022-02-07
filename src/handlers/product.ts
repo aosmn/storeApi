@@ -5,8 +5,13 @@ import { Product, ProductStore } from '../models/product';
 const store = new ProductStore();
 
 const index = async (_req: Request, res: Response) => {
-  const products = await store.index();
-  res.json(products);
+  try {
+    const products = await store.index();
+    res.json(products);
+  } catch (error) {
+    res.status(400);
+    res.send(error)
+  }
 };
 
 const indexByCategory = async (req: Request, res: Response) => {
@@ -47,8 +52,13 @@ const create = async (req: Request, res: Response) => {
 };
 
 const destroy = async (req: Request, res: Response) => {
-  const deleted = await store.delete(req.params.id);
-  res.json(deleted);
+  try {
+    const deleted = await store.delete(req.params.id);
+    res.json(deleted);
+  } catch (error) {
+    res.status(400);
+    res.send(error)
+  }
 };
 
 const productRoutes = (app: express.Application) => {

@@ -5,23 +5,43 @@ import { Order, OrderStore } from '../models/order';
 const store = new OrderStore();
 
 const index = async (_req: Request, res: Response) => {
-  const orders = await store.index();
-  res.json(orders);
+  try {
+    const orders = await store.index();
+    res.json(orders);
+  } catch (error) {
+    res.status(400);
+    res.send(error);
+  }
 };
 
 const indexByUser = async (req: Request, res: Response) => {
-  const orders = await store.indexByUser(req.params.id);
-  res.json(orders);
+  try {
+    const orders = await store.indexByUser(req.params.id);
+    res.json(orders);
+  } catch (error) {
+    res.status(400);
+    res.send(error);
+  }
 };
 
 const indexCompleteByUser = async (req: Request, res: Response) => {
-  const orders = await store.indexCompleteByUser(req.params.id);
-  res.json(orders);
+  try {
+    const orders = await store.indexCompleteByUser(req.params.id);
+    res.json(orders);
+  } catch (error) {
+    res.status(400);
+    res.send(error);
+  }
 };
 
 const show = async (req: Request, res: Response) => {
-  const order = await store.show(req.params.id);
-  res.json(order);
+  try {
+    const order = await store.show(req.params.id);
+    res.json(order);
+  } catch (error) {
+    res.status(400);
+    res.send(error);
+  }
 };
 
 const create = async (req: Request, res: Response) => {
@@ -40,15 +60,19 @@ const create = async (req: Request, res: Response) => {
 };
 
 const destroy = async (req: Request, res: Response) => {
-  const deleted = await store.delete(req.params.id);
-  res.json(deleted);
+  try {
+    const deleted = await store.delete(req.params.id);
+    res.json(deleted);
+  } catch (error) {
+    res.status(400);
+    res.send(error);
+  }
 };
 
 const addProduct = async (req: Request, res: Response) => {
   const orderId = req.params.id;
   const productId = req.body.productId;
   const quantity = parseInt(req.body.quantity);
-  
   try {
     const addedProduct = await store.addProduct(quantity, orderId, productId);
     res.json(addedProduct);
@@ -59,7 +83,6 @@ const addProduct = async (req: Request, res: Response) => {
 };
 const getProducts = async (req: Request, res: Response) => {
   const orderId = req.params.id;
-
   try {
     const orderProducts = await store.showOrderProducts(orderId);
     res.json(orderProducts);
@@ -70,7 +93,7 @@ const getProducts = async (req: Request, res: Response) => {
 };
 
 const deleteProduct = async (req: Request, res: Response) => {
-  const {orderId, productId} = req.params;
+  const { orderId, productId } = req.params;
 
   try {
     const deleted = await store.deleteOrderProduct(orderId, productId);
@@ -86,8 +109,12 @@ const orderRoutes = (app: express.Application) => {
 
   app.get('/orders/:id/products', verifyAuthToken, getProducts);
   app.post('/orders/:id/products', verifyAuthToken, addProduct);
-  app.delete('/orders/:orderId/products/:productId', verifyAuthToken, deleteProduct);
-  
+  app.delete(
+    '/orders/:orderId/products/:productId',
+    verifyAuthToken,
+    deleteProduct
+  );
+
   app.get('/orders/:id', show);
   app.delete('/orders/:id', verifyAuthToken, destroy);
 
